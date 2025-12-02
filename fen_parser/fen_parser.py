@@ -6,9 +6,7 @@
 ##
 
 from dataclasses import dataclass
-from typing import List, Tuple
-import re
-
+from typing import List
 
 class FENParseError(Exception):
     pass
