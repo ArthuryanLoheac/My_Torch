@@ -21,8 +21,6 @@ My_Torch/
 │   └── fen_parser.py        # Parser implementation
 ├── tests/
 │   └── test_fen_parser.py   # Unit tests (37 tests)
-├── examples/
-│   └── fen_parser_examples.py  # Usage examples
 └── docs/
     └── FEN_PARSER_DOCUMENTATION.md  # Complete documentation
 ```
@@ -134,7 +132,7 @@ The module includes 37 unit tests covering:
 
 ```bash
 # Run tests
-cd "/home/nolfews/Documents/Tek03/Computer Numerical Analysis/My_Torch"
+cd My_Torch
 python tests/test_fen_parser.py
 ```
 
