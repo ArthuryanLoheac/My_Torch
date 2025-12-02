@@ -11,7 +11,7 @@ import os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from fen_parser import FENParser, FENParseError, ParsedFEN
+from fen_parser import FENParser, FENParseError
 
 
 class TestFENParserValid(unittest.TestCase):
