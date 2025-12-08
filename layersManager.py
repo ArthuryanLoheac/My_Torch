@@ -1,7 +1,7 @@
 import multilayerPerceptron
 
 class layersManager:
-    def __init__(self, inputNb: int, hiddenLayers: int, hiddenNb: int, outputNb: int, learningRate: float = 0.001):
+    def __init__(self, inputNb: int, hiddenNb: list[int], outputNb: int, learningRate: float = 0.001):
         self.learningRate = learningRate
         self.layers = []
         self.thresh = 0.5
@@ -11,9 +11,9 @@ class layersManager:
         self.layers.append(inputLayer)
 
         # Hidden layer
-        for _ in range(hiddenLayers):
+        for i in range(len(hiddenNb)):
             prevLayer = self.layers[-1]
-            hiddenLayer = [multilayerPerceptron.neuron(prevLayer, learningRate=learningRate) for _ in range(hiddenNb)]
+            hiddenLayer = [multilayerPerceptron.neuron(prevLayer, learningRate=learningRate) for _ in range(hiddenNb[i])]
             self.layers.append(hiddenLayer)
 
         # Output layer

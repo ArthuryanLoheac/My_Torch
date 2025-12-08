@@ -4,34 +4,29 @@ import random
 import sys
 
 partiesTraining = [
-    [[" ", " ", " ", " ", " ", " ", " ", " ", " "], "Nothing"],
-    [["X", " ", " ", " ", " ", " ", " ", " ", " "], "Nothing"],
-    [["O", "X", " ", " ", " ", " ", " ", " ", " "], "Nothing"],
-    [["X", "O", "X", "O", "X", "O", "X", "O", "X"], "Draw"],
-    [["O", "O", "O", "X", "X", " ", " ", " ", " "], "Win O"],
-    [[" ", " ", " ", " ", " ", " ", " ", " ", " "], "Nothing"],
-    [["X", "O", " ", " ", " ", " ", " ", " ", " "], "Nothing"],
-    [["X", "O", "X", " ", " ", " ", " ", " ", " "], "Nothing"],
-    [["X", "X", "X", "O", "O", " ", " ", " ", " "], "Win X"],
-    [["X", "O", "X", "X", "O", "O", "O", "X", "X"], "Draw"],
-    [["X", "X", "X", "O", "O", " ", " ", " ", " "], "Win X"],
-    [["O", " ", "X", "O", "X", " ", "O", " ", "X"], "Win O"],
-    [["X", "O", "X", "X", "O", "O", "O", "X", "X"], "Draw"],
-    [["O", "X", "X", "X", "O", "X", "X", "O", "O"], "Draw"],
-    [["O", "X", "O", "X", "O", "X", "X", "O", "X"], "Draw"],
-    [["X", "X", "O", "X", "O", " ", "O", " ", " "], "Win O"],
-    [["O", "X", " ", "O", "X", " ", "O", " ", "X"], "Win O"],
-    [["X", "X", "O", "O", "O", "O", "X", "X", "X"], "Draw"],
-    [["X", "O", "X", "O", "X", "O", "X", "O", " "], "Nothing"],
-    [["X", "O", " ", " ", "X", "O", " ", " ", "X"], "Win X"],
-    [["O", "O", "X", "X", "X", "O", "O", "X", " "], "Nothing"],
-    [[" ", "X", "X", " ", "X", "O", "O", "X", "O"], "Win X"],
-    [["O", "X", "O", "X", "O", "X", "O", "X", "O"], "Win O"],
-
-    # -----------------------
-    # ÉNORME AGRANDISSEMENT :
-    # -----------------------
-
+    [[" "," "," "," "," "," "," "," "," "], "Nothing"],
+    [["X"," "," "," "," "," "," "," "," "], "Nothing"],
+    [["O","X"," "," "," "," "," "," "," "], "Nothing"],
+    [["X","O","X","O","X","O","X","O","X"], "Draw"],
+    [["O","O","O","X","X"," "," "," "," "], "Win O"],
+    [[" "," "," "," "," "," "," "," "," "], "Nothing"],
+    [["X","O"," "," "," "," "," "," "," "], "Nothing"],
+    [["X","O","X"," "," "," "," "," "," "], "Nothing"],
+    [["X","X","X","O","O"," "," "," "," "], "Win X"],
+    [["X","O","X","X","O","O","O","X","X"], "Draw"],
+    [["X","X","X","O","O"," "," "," "," "], "Win X"],
+    [["O"," ","X","O","X"," ","O"," ","X"], "Win O"],
+    [["X","O","X","X","O","O","O","X","X"], "Draw"],
+    [["O","X","X","X","O","X","X","O","O"], "Draw"],
+    [["O","X","O","X","O","X","X","O","X"], "Draw"],
+    [["X","X","O","X","O"," ","O"," "," "], "Win O"],
+    [["O","X"," ","O","X"," ","O"," ","X"], "Win O"],
+    [["X","X","O","O","O","O","X","X","X"], "Draw"],
+    [["X","O","X","O","X","O","X","O"," "], "Nothing"],
+    [["X","O"," "," ","X","O"," "," ","X"], "Win X"],
+    [["O","O","X","X","X","O","O","X"," "], "Nothing"],
+    [[" ","X","X"," ","X","O","O","X","O"], "Win X"],
+    [["O","X","O","X","O","X","O","X","O"], "Win O"],
     [["X","X","X"," "," "," ","O","O"," "], "Win X"],
     [["O","O","O","X"," ","X"," "," ","X"], "Win O"],
     [["X","O","X","O","X"," ","O","X","O"], "Win X"],
@@ -64,11 +59,11 @@ partiesTraining = [
 ]
 
 partiesTest = [
-    [["X", "X", "X", " ", "O", " ", " ", " ", " "], "Win X"], # X gagne (ligne du haut)
-    [["O", " ", "X", "O", "X", " ", "O", " ", "X"], "Win O"], # O gagne (colonne)
-    [["X", "O", "X", "X", "O", "O", "O", "X", "X"], "Draw"], # match nul
-    [[" ", " ", " ", " ", " ", " ", " ", " ", " "], "Nothing"], # tout vide
-    [["X", "O", "X", "O", "X", "O", "X", "O", "X"], "Draw"], # alterné
+    [["X","X","X"," ","O"," "," "," "," "], "Win X"], # X gagne (ligne du haut)
+    [["O"," ","X","O","X"," ","O"," ","X"], "Win O"], # O gagne (colonne)
+    [["X","O","X","X","O","O","O","X","X"], "Draw"], # match nul
+    [[" "," "," "," "," "," "," "," "," "], "Nothing"], # tout vide
+    [["X","O","X","O","X","O","X","O","X"], "Draw"], # alterné
 ]
 
 def tryBoardToInput(inputs, expected, layers: layersManager.layersManager):
@@ -92,7 +87,7 @@ def main():
         print(f"Using random seed: {seed}")
     random.seed(seed)
     # Create network (adjust learningRate if needed)
-    layers = layersManager.layersManager(inputNb=9, hiddenLayers=1, hiddenNb=5, outputNb=4, learningRate=0.05)
+    layers = layersManager.layersManager(inputNb=9, hiddenNb=[5], outputNb=4, learningRate=0.05)
 
     inputs = []
     targets = []
@@ -136,5 +131,6 @@ def main():
         tryBoardToInput(inputTest, label_to_onehot[target], layers)
 
     print(f"Training completed with accuracy: {accuracy*100:.2f}%")
+
 if __name__ == '__main__':
     main()
