@@ -2,83 +2,31 @@
 import layersManager
 import random
 import sys
+from chess_positions import partiesTraining, partiesTest
 
-partiesTraining = [
-    [[" "," "," "," "," "," "," "," "," "], "Nothing"],
-    [["X"," "," "," "," "," "," "," "," "], "Nothing"],
-    [["O","X"," "," "," "," "," "," "," "], "Nothing"],
-    [["X","O","X","O","X","O","X","O","X"], "Draw"],
-    [["O","O","O","X","X"," "," "," "," "], "Win O"],
-    [[" "," "," "," "," "," "," "," "," "], "Nothing"],
-    [["X","O"," "," "," "," "," "," "," "], "Nothing"],
-    [["X","O","X"," "," "," "," "," "," "], "Nothing"],
-    [["X","X","X","O","O"," "," "," "," "], "Win X"],
-    [["X","O","X","X","O","O","O","X","X"], "Draw"],
-    [["X","X","X","O","O"," "," "," "," "], "Win X"],
-    [["O"," ","X","O","X"," ","O"," ","X"], "Win O"],
-    [["X","O","X","X","O","O","O","X","X"], "Draw"],
-    [["O","X","X","X","O","X","X","O","O"], "Draw"],
-    [["O","X","O","X","O","X","X","O","X"], "Draw"],
-    [["X","X","O","X","O"," ","O"," "," "], "Win O"],
-    [["O","X"," ","O","X"," ","O"," ","X"], "Win O"],
-    [["X","X","O","O","O","O","X","X","X"], "Draw"],
-    [["X","O","X","O","X","O","X","O"," "], "Nothing"],
-    [["X","O"," "," ","X","O"," "," ","X"], "Win X"],
-    [["O","O","X","X","X","O","O","X"," "], "Nothing"],
-    [[" ","X","X"," ","X","O","O","X","O"], "Win X"],
-    [["O","X","O","X","O","X","O","X","O"], "Win O"],
-    [["X","X","X"," "," "," ","O","O"," "], "Win X"],
-    [["O","O","O","X"," ","X"," "," ","X"], "Win O"],
-    [["X","O","X","O","X"," ","O","X","O"], "Win X"],
-    [["O","X","O","X","O","X","X","O","X"], "Draw"],
-    [["X","A","O","O","X","O","X","O","X"], "Draw"],
-    [["X","O"," ","O","X"," ","X"," ","O"], "Win X"],
-    [["O","X","O","X","X","O","O","O","X"], "Win O"],
-    [[" ","X","O"," ","X","O"," ","X","O"], "Win X"],
-    [["X","O","X","O","X","O","O","X"," "], "Win X"],
-    [["X","O"," ","X","O"," ","X","O","X"], "Win X"],
-    [["O","X","O","X","O","X"," "," ","X"], "Win X"],
-    [["O","O","X","X","O","X","X","O","X"], "Win O"],
-    [["X","O","X","X","X","O","O","O","X"], "Win X"],
-    [["O","X","O","X","O","X","X","O"," "], "Win O"],
-    [["X","X","O","O","X","O","O","X","X"], "Draw"],
-    [["X","O","O","O","X","X","X","O"," "], "Win X"],
-    [["O","X","X","X","O","O","X"," "," "], "Win X"],
-    [["X","O","X","O","X","O","O","O","X"], "Win O"],
-    [["O","X","O","O","X","X","X","O","X"], "Draw"],
-    [[" ","O","X","X","O","X","O","X","O"], "Win O"],
-    [["X"," ","O","X","O","X","O"," ","X"], "Win X"],
-    [["X","O","X","X","O","X","O"," "," "], "Win X"],
-    [["O","X","O","X","X","O","X"," "," "], "Nothing"],
-    [["X","X","O","O","O","X","X"," "," "], "Win O"],
-    [["O","O","X","X","X","O"," "," ","X"], "Win X"],
-    [["X","X"," ","O","O","X","X","O","O"], "Draw"],
-    [[" "," ","X","O","X","O","O","X"," "], "Nothing"],
-    [["X","X","X","O","O","O"," "," "," "], "Draw"],
-    [["O","X","X","O","O","O","X"," "," "], "Win O"],
-]
+def transformBoardToInput(board: list[str]) -> list[list[float]]:
+    listPieces = ['r','n','b','q','k','p','R','N','B','Q','K','P']
+    listofInputs = []
+    for piece in listPieces:
+        listofInputs.append([1.0 if cell == piece else 0.0 for cell in board])
+    return listofInputs
 
-partiesTest = [
-    [["X","X","X"," ","O"," "," "," "," "], "Win X"], # X gagne (ligne du haut)
-    [["O"," ","X","O","X"," ","O"," ","X"], "Win O"], # O gagne (colonne)
-    [["X","O","X","X","O","O","O","X","X"], "Draw"], # match nul
-    [[" "," "," "," "," "," "," "," "," "], "Nothing"], # tout vide
-    [["X","O","X","O","X","O","X","O","X"], "Draw"], # alterné
-]
-
-def tryBoardToInput(inputs, expected, layers: layersManager.layersManager):
+def tryBoardToInput(inputs, expected, layers: layersManager.layersManager, board=None):
     layers.setInputs(inputs)
     layers.forwardCompute()
     outputs = [n.getOutput() for n in layers.getOutputLayer()]
     pred_idx = outputs.index(max(outputs))
-    idx_to_label = {0: "Win X", 1: "Draw", 2: "Win O", 3: "Nothing"}
+    idx_to_label = {0: "Nothing", 1: "Check", 2: "Checkmate"}
     pred = idx_to_label[pred_idx]
-    inputFormated = [ " " if v == 0.0 else ("X" if v == 1.0 else "O") for v in inputs]
-    print(f"{inputFormated[0]}|{inputFormated[1]}|{inputFormated[2]}")
-    print(f"{inputFormated[3]}|{inputFormated[4]}|{inputFormated[5]}")
-    print(f"{inputFormated[6]}|{inputFormated[7]}|{inputFormated[8]}")
-    print(f"-> outputs: {outputs[0]:.3f}, {outputs[1]:.3f}, {outputs[2]:.3f} (pred: {pred}, expected: {idx_to_label[expected.index(max(expected))]})")
+    # Display original board if provided
+    if board:
+        for i in range(8):
+            print("".join(board[i*8:(i+1)*8]))
+    print(f"-> (pred: {pred}, expected: {idx_to_label[expected.index(max(expected))]})")
     print()
+    if pred_idx == expected.index(max(expected)):
+        return 1
+    return 0
 
 def main():
     seed = int(sys.argv[1]) if len(sys.argv) > 1 else None;
@@ -87,14 +35,18 @@ def main():
         print(f"Using random seed: {seed}")
     random.seed(seed)
     # Create network (adjust learningRate if needed)
-    layers = layersManager.layersManager(inputNb=9, hiddenNb=[5], outputNb=4, learningRate=0.05)
+    # 12 piece types × 64 squares = 768 inputs
+    layers = layersManager.layersManager(inputNb=768, hiddenNb=[128, 64], outputNb=3, learningRate=0.05)
 
     inputs = []
     targets = []
-    # Map string labels to one-hot vectors: [Win , Draw, Nothing]
-    label_to_onehot = {"Win X": [1.0, 0.0, 0.0, 0.0], "Draw": [0.0, 1.0, 0.0, 0.0], "Win O": [0.0, 0.0, 1.0, 0.0], "Nothing": [0.0, 0.0, 0.0, 1.0]}
+    # Map string labels to one-hot vectors: [Nothing, Check, Checkmate]
+    label_to_onehot = {"Nothing": [1.0, 0.0, 0.0], "Check": [0.0, 1.0, 0.0], "Checkmate": [0.0, 0.0, 1.0]}
     for party, target in partiesTraining:
-        inputs.append([0.0 if cell == " " else (1.0 if cell == "X" else -1.0) for cell in party])
+        # Use transformBoardToInput and flatten to single vector
+        board_layers = transformBoardToInput(party)
+        flattened = [val for layer in board_layers for val in layer]
+        inputs.append(flattened)
         targets.append(label_to_onehot[target])
 
     isValidation = False
@@ -123,14 +75,17 @@ def main():
             break
 
     accuracy = layers.evaluateValidation(inputs, targets)
-    for i in range(len(inputs)):
-        tryBoardToInput(inputs[i], targets[i], layers)
+    for i, (party, target) in enumerate(partiesTraining):
+        tryBoardToInput(inputs[i], targets[i], layers, party)
     print("\nTesting on separate test set:")
+    nb_validated = 0
     for party, target in partiesTest:
-        inputTest = [0.0 if cell == " " else (1.0 if cell == "X" else -1.0) for cell in party]
-        tryBoardToInput(inputTest, label_to_onehot[target], layers)
+        board_layers = transformBoardToInput(party)
+        inputTest = [val for layer in board_layers for val in layer]
+        nb_validated += tryBoardToInput(inputTest, label_to_onehot[target], layers, party)
 
     print(f"Training completed with accuracy: {accuracy*100:.2f}%")
+    print(f"Test set: {((nb_validated / len(partiesTest)) * 100):.2f}% correct.")
 
 if __name__ == '__main__':
     main()
