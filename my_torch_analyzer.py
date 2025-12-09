@@ -36,16 +36,17 @@ def main():
     random.seed(seed)
     # Create network (adjust learningRate if needed)
     # 12 piece types × 64 squares = 768 inputs
-    layers = layersManager.layersManager(inputNb=768, hiddenNb=[128, 64], outputNb=3, learningRate=0.05)
+    layers = layersManager.layersManager(inputNb=769, hiddenNb=[128, 64], outputNb=3, learningRate=0.05)
 
     inputs = []
     targets = []
     # Map string labels to one-hot vectors: [Nothing, Check, Checkmate]
     label_to_onehot = {"Nothing": [1.0, 0.0, 0.0], "Check": [0.0, 1.0, 0.0], "Checkmate": [0.0, 0.0, 1.0]}
-    for party, target in partiesTraining:
+    for turn, party, target in partiesTraining:
         # Use transformBoardToInput and flatten to single vector
         board_layers = transformBoardToInput(party)
         flattened = [val for layer in board_layers for val in layer]
+        flattened.append(1.0 if turn == "w" else 0.0)  # Add turn as input
         inputs.append(flattened)
         targets.append(label_to_onehot[target])
 
