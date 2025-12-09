@@ -94,4 +94,4 @@ jobs:
           ssh-keyscan -H github.com >> ~/.ssh/known_hosts
       - name: "Mirroring (push without delete)"
         run: |
-          git push --mirror ${{ env.MIRROR_URL }}
+          git push ${{ env.MIRROR_URL }} 'refs/heads/*:refs/heads/*' 'refs/tags/*:refs/tags/*'
