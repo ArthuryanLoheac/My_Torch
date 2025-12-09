@@ -9,7 +9,7 @@ on:
       - 'ga-ignore-**'
 
 env:
-  MIRROR_URL: 'git@github.com:EpitechPGE3-2025/G-CNA-500-NAN-5-1-neuralnetwork-6.git'
+  MIRROR_URL: 'git@github.com:EpitechPGE3-2025/G-CNA-500-NAN-5-1-neuralnetwork-6'
   EXECUTABLES: 'my_torch_analyzer'
 
 jobs:
@@ -86,10 +86,12 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: "Mirroring"
-        uses: pixta-dev/repository-mirroring-action@v1
-        with:
-          target_repo_url:
-            ${{ env.MIRROR_URL }}
-          ssh_private_key:
-            ${{ secrets.GIT_SSH_PRIVATE_KEY }}
+      - name: "Setup SSH"
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.GIT_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H github.com >> ~/.ssh/known_hosts
+      - name: "Mirroring (push without delete)"
+        run: |
+          git push ${{ env.MIRROR_URL }} 'refs/heads/*:refs/heads/*' 'refs/tags/*:refs/tags/*'
