@@ -6,10 +6,10 @@ from chess_positions import partiesTraining, partiesTest
 
 def transformBoardToInput(board: list[str]) -> list[list[float]]:
     listPieces = ['r','n','b','q','k','p','R','N','B','Q','K','P']
-    listofInputs = []
+    listInputs = []
     for piece in listPieces:
-        listofInputs.append([1.0 if cell == piece else 0.0 for cell in board])
-    return listofInputs
+        listInputs.append([1.0 if cell == piece else 0.0 for cell in board])
+    return listInputs
 
 def tryBoardToInput(inputs, expected, layers: layersManager.layersManager, board=None):
     layers.setInputs(inputs)
