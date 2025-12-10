@@ -75,7 +75,7 @@ vector = encoder.encode(parsed_fen)
 
 print(f"Vector shape: {vector.shape}")  # (781,)
 print(f"Vector dtype: {vector.dtype}")  # float32
-print(f"Non-zero elements: {np.count_nonzero(vector)}")  # 39 (32 pieces + 1 side + 4 castling + 0 en passant)
+print(f"Non-zero elements: {np.count_nonzero(vector)}")  # 36 (32 pieces + 0 side (white=0.0) + 4 castling + 0 en passant)
 ```
 
 ### Complete Pipeline
@@ -292,7 +292,7 @@ The encoder includes 22 comprehensive unit tests covering:
 ### Running Tests
 
 ```bash
-cd "/home/nolfews/Documents/Tek03/Computer Numerical Analysis/My_Torch"
+cd "/My_Torch"
 python tests/test_fen_encoder.py
 ```
 
