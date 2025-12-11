@@ -57,10 +57,10 @@ def main():
     if len(sys.argv) > 1:
         if sys.argv[1] in ["--predict", "-p"]:
             mode = "predict"
-            if len(sys.argv) > 3:
-                loadfile = sys.argv[3]
-                if len(sys.argv) > 4:
-                    chessfile = sys.argv[4]
+            if len(sys.argv) > 2:
+                loadfile = sys.argv[2]
+                if len(sys.argv) > 3:
+                    chessfile = sys.argv[3]
         elif sys.argv[1] in ["--train", "-t"]:
             mode = "train"
             if len(sys.argv) > 3 and sys.argv[2] in ["--save", "-s"]:
@@ -90,7 +90,7 @@ def main():
         print("Error: LOADFILE must be specified.")
         return
     if chessfile is None:
-        print("Error: LOADFILE must be specified.")
+        print("Error: CHESSFILE must be specified.")
         return
 
     if seed is None:
@@ -99,7 +99,7 @@ def main():
     random.seed(seed)
     # Create network (adjust learningRate if needed)
     # 12 piece types × 64 squares + 1 turn indicator = 769 inputs
-    layers = layersManager.layersManager(inputNb=769, hiddenNb=[128, 64], outputNb=3, learningRate=0.05)
+    #layers = layersManager.layersManager(inputNb=769, hiddenNb=[128, 64], outputNb=3, learningRate=0.05)
 
     inputs = []
     targets = []
@@ -113,7 +113,7 @@ def main():
         inputs.append(flattened)
         targets.append(label_to_onehot[target])
 
-    if mode == "load":
+    if mode == "predict":
         # Load existing model
         print(f"\nLoading model from {loadfile}...")
         try:
@@ -123,16 +123,23 @@ def main():
             accuracy = layers.evaluateValidation(inputs, targets)
             print(f"Training set accuracy: {accuracy*100:.2f}%")
             
-            test_accuracy = test_model(layers, label_to_onehot)
+            test_model(layers, label_to_onehot)
             
         except Exception as e:
             print(f"Failed to load model: {e}")
             return
-
-    else:
+    elif mode == "train":
         isValidation = False
         maxEpochs = 100000
         currentEpoch = 0
+
+
+        try:
+            layers = ModelSaver.load_model(loadfile)
+        except Exception as e:
+            print(f"Failed to load model: {e}")
+            return
+
 
         while not isValidation:
             currentEpoch += 1
@@ -168,16 +175,12 @@ def main():
 
         print(f"Training completed with accuracy: {accuracy*100:.2f}%")
         print(f"Test set: {((nb_validated / len(partiesTest)) * 100):.2f}% correct.")
-        save_choice = input("\nSave this model? (y/n): ").strip().lower()
-        if save_choice == 'y':
-            custom_path = input(f"Enter path (default: {loadfile}): ").strip()
-            if custom_path:
-                loadfile = custom_path
-            
-            if ModelSaver.save_model(layers, loadfile):
-                print(f"Model saved successfully!")
-                print(f"To load this model later, run:")
-                print(f"  python My_TorchAnalyzer.py --load {loadfile}")
+        if savefile:
+            loadfile = savefile
+        if ModelSaver.save_model(layers, loadfile):
+            print(f"Model saved successfully!")
+            print(f"To load this model later, run:")
+            print(f"  python My_TorchAnalyzer.py --load {loadfile}")
 
 if __name__ == '__main__':
     main()
