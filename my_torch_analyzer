@@ -19,19 +19,13 @@ def tryBoardToInput(inputs, expected, layers: layersManager.layersManager, board
     pred_idx = outputs.index(max(outputs))
     idx_to_label = {0: "Nothing", 1: "Check", 2: "Checkmate"}
     pred = idx_to_label[pred_idx]
-    # Display original board if provided
-    if board:
-        for i in range(8):
-            print("".join(board[i*8:(i+1)*8]))
-    print(f"->{turn} (pred: {pred}, expected: {idx_to_label[expected.index(max(expected))]})")
-    print()
+    print(pred)
     if pred_idx == expected.index(max(expected)):
         return 1
     return 0
 
 def test_model(layers, label_to_onehot):
     """Test the model on test set"""
-    print("\nTesting on separate test set:")
     nb_validated = 0
     
     for turn, party, target in partiesTest:
@@ -41,7 +35,7 @@ def test_model(layers, label_to_onehot):
         nb_validated += tryBoardToInput(inputTest, label_to_onehot[target], layers, party, turn)
     
     test_accuracy = (nb_validated / len(partiesTest)) * 100
-    print(f"Test set: {test_accuracy:.2f}% correct.")
+    print(f"DDDDDTest set: {test_accuracy:.2f}% correct.")
     return test_accuracy
 
 def main():
@@ -51,7 +45,6 @@ def main():
     chessfile = None
     mode = "predict"  # default mode
     save = False
-    seed = None
     
     # Simple argument parsing
     if len(sys.argv) > 1:
@@ -93,10 +86,6 @@ def main():
         print("Error: CHESSFILE must be specified.")
         return
 
-    if seed is None:
-        seed = random.randint(0, 1000000)
-        print(f"Using random seed: {seed}")
-    random.seed(seed)
     # Create network (adjust learningRate if needed)
     # 12 piece types × 64 squares + 1 turn indicator = 769 inputs
     #layers = layersManager.layersManager(inputNb=769, hiddenNb=[128, 64], outputNb=3, learningRate=0.05)
@@ -115,18 +104,13 @@ def main():
 
     if mode == "predict":
         # Load existing model
-        print(f"\nLoading model from {loadfile}...")
         try:
             layers = ModelSaver.load_model(loadfile)
-            
             # Test the loaded model
             accuracy = layers.evaluateValidation(inputs, targets)
-            print(f"Training set accuracy: {accuracy*100:.2f}%")
-            
             test_model(layers, label_to_onehot)
             
         except Exception as e:
-            print(f"Failed to load model: {e}")
             return
     elif mode == "train":
         isValidation = False
@@ -137,7 +121,6 @@ def main():
         try:
             layers = ModelSaver.load_model(loadfile)
         except Exception as e:
-            print(f"Failed to load model: {e}")
             return
 
 
@@ -156,31 +139,22 @@ def main():
             accuracy = layers.evaluateValidation(inputs, targets)
             if accuracy == 1.0:
                 isValidation = True
-                print(f"Perfect accuracy reached at epoch {currentEpoch}")
                 break
             if currentEpoch >= maxEpochs:
-                print("Max epochs reached without perfect accuracy.")
                 break
 
         accuracy = layers.evaluateValidation(inputs, targets)
         for i, (turn, party, target) in enumerate(partiesTraining):
             tryBoardToInput(inputs[i], targets[i], layers, party, turn)
-        print("\nTesting on separate test set:")
         nb_validated = 0
         for turn, party, target in partiesTest:
             board_layers = transformBoardToInput(party)
             board_layers.insert(0, [1.0 if turn == "w" else 0.0])  # Add turn indicator layer for test
             inputTest = [val for layer in board_layers for val in layer]
             nb_validated += tryBoardToInput(inputTest, label_to_onehot[target], layers, party, turn)
-
-        print(f"Training completed with accuracy: {accuracy*100:.2f}%")
-        print(f"Test set: {((nb_validated / len(partiesTest)) * 100):.2f}% correct.")
         if savefile:
             loadfile = savefile
-        if ModelSaver.save_model(layers, loadfile):
-            print(f"Model saved successfully!")
-            print(f"To load this model later, run:")
-            print(f"  python My_TorchAnalyzer.py --load {loadfile}")
+        ModelSaver.save_model(layers, loadfile)
 
 if __name__ == '__main__':
     main()

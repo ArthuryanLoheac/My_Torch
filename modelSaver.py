@@ -52,10 +52,8 @@ class ModelSaver:
             os.makedirs(os.path.dirname(filepath) if os.path.dirname(filepath) else '.', exist_ok=True)
             with open(filepath, 'w') as f:
                 json.dump(model_data, f, indent=2)
-            print(f"Model saved successfully to {filepath}")
             return True
         except Exception as e:
-            print(f"Error saving model: {e}")
             return False
     
     @staticmethod
@@ -99,11 +97,8 @@ class ModelSaver:
                     neuron.weights = neuron_data['weights']
                     neuron.bias = neuron_data['bias']
                     neuron.learnc = neuron_data['learning_rate']
-            print(f"Model loaded successfully from {filepath}")
-            print(f"Architecture: Input={input_size}, Hidden={hidden_sizes}, Output={output_size}")
             return layers_mgr
         except Exception as e:
-            print(f"Error loading model: {e}")
             raise
 
     @staticmethod
@@ -124,5 +119,4 @@ class ModelSaver:
             return model_data['architecture']
 
         except Exception as e:
-            print(f"Error reading model info: {e}")
             return {}
