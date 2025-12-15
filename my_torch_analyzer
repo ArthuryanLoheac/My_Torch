@@ -4,6 +4,7 @@ import random
 import sys
 from chess_positions import partiesTraining, partiesTest
 from modelSaver import ModelSaver
+from fen_parser.fenParserToData import fen_parser_to_data
 
 def transformBoardToInput(board: list[str]) -> list[list[float]]:
     listPieces = ['r','n','b','q','k','p','R','N','B','Q','K','P']
@@ -12,7 +13,7 @@ def transformBoardToInput(board: list[str]) -> list[list[float]]:
         listInputs.append([1.0 if cell == piece else 0.0 for cell in board])
     return listInputs
 
-def tryBoardToInput(inputs, expected, layers: layersManager.layersManager, board=None, turn=None):
+def tryBoardToInput(inputs, layers: layersManager.layersManager, board=None, turn=None):
     layers.setInputs(inputs)
     layers.forwardCompute()
     outputs = [n.getOutput() for n in layers.getOutputLayer()]
@@ -20,31 +21,27 @@ def tryBoardToInput(inputs, expected, layers: layersManager.layersManager, board
     idx_to_label = {0: "Nothing", 1: "Check", 2: "Checkmate"}
     pred = idx_to_label[pred_idx]
     print(pred)
-    if pred_idx == expected.index(max(expected)):
-        return 1
     return 0
 
-def test_model(layers, label_to_onehot):
+def test_model(layers, dataChess):
     """Test the model on test set"""
     nb_validated = 0
     
-    for turn, party, target in partiesTest:
+    for turn, party in dataChess:
         board_layers = transformBoardToInput(party)
         board_layers.insert(0, [1.0 if turn == "w" else 0.0])
         inputTest = [val for layer in board_layers for val in layer]
-        nb_validated += tryBoardToInput(inputTest, label_to_onehot[target], layers, party, turn)
+        nb_validated += tryBoardToInput(inputTest, layers, party, turn)
     
-    test_accuracy = (nb_validated / len(partiesTest)) * 100
-    print(f"DDDDDTest set: {test_accuracy:.2f}% correct.")
+    test_accuracy = (nb_validated / len(dataChess)) * 100
     return test_accuracy
 
 def main():
     # Parse command line arguments
-    loadfile = None
+    loadfile = "my_torch_network.nn"
     savefile = None
     chessfile = None
     mode = "predict"  # default mode
-    save = False
     
     # Simple argument parsing
     if len(sys.argv) > 1:
@@ -86,6 +83,7 @@ def main():
         print("Error: CHESSFILE must be specified.")
         return
 
+    dataChess = fen_parser_to_data(chessfile)
     # Create network (adjust learningRate if needed)
     # 12 piece types × 64 squares + 1 turn indicator = 769 inputs
     #layers = layersManager.layersManager(inputNb=769, hiddenNb=[128, 64], outputNb=3, learningRate=0.05)
@@ -108,7 +106,7 @@ def main():
             layers = ModelSaver.load_model(loadfile)
             # Test the loaded model
             accuracy = layers.evaluateValidation(inputs, targets)
-            test_model(layers, label_to_onehot)
+            test_model(layers, dataChess)
             
         except Exception as e:
             return
@@ -145,13 +143,13 @@ def main():
 
         accuracy = layers.evaluateValidation(inputs, targets)
         for i, (turn, party, target) in enumerate(partiesTraining):
-            tryBoardToInput(inputs[i], targets[i], layers, party, turn)
+            tryBoardToInput(inputs[i], layers, party, turn)
         nb_validated = 0
-        for turn, party, target in partiesTest:
+        for turn, party in dataChess:
             board_layers = transformBoardToInput(party)
             board_layers.insert(0, [1.0 if turn == "w" else 0.0])  # Add turn indicator layer for test
             inputTest = [val for layer in board_layers for val in layer]
-            nb_validated += tryBoardToInput(inputTest, label_to_onehot[target], layers, party, turn)
+            nb_validated += tryBoardToInput(inputTest, layers, party, turn)
         if savefile:
             loadfile = savefile
         ModelSaver.save_model(layers, loadfile)
