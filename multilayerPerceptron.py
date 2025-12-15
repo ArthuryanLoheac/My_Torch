@@ -4,7 +4,7 @@ from typing import List, Optional
 
 
 class neuron:
-    def __init__(self, lstInputs: List[neuron] = None, learningRate: Optional[float] = 0.001):
+    def __init__(self, lstInputs: List['neuron'] = None, learningRate: Optional[float] = 0.001):
         self.learnc = learningRate
         self.bias = random.uniform(-1.0, 1.0)
         self.weights = []

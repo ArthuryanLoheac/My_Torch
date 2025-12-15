@@ -1,0 +1,158 @@
+#!/usr/bin/env python3
+import layersManager
+import random
+import sys
+from chess_positions import partiesTraining, partiesTest
+from modelSaver import ModelSaver
+from fen_parser.fenParserToData import fen_parser_to_data
+
+def transformBoardToInput(board: list[str]) -> list[list[float]]:
+    listPieces = ['r','n','b','q','k','p','R','N','B','Q','K','P']
+    listInputs = []
+    for piece in listPieces:
+        listInputs.append([1.0 if cell == piece else 0.0 for cell in board])
+    return listInputs
+
+def tryBoardToInput(inputs, layers: layersManager.layersManager, board=None, turn=None):
+    layers.setInputs(inputs)
+    layers.forwardCompute()
+    outputs = [n.getOutput() for n in layers.getOutputLayer()]
+    pred_idx = outputs.index(max(outputs))
+    idx_to_label = {0: "Nothing", 1: "Check", 2: "Checkmate"}
+    pred = idx_to_label[pred_idx]
+    print(pred)
+    return 0
+
+def test_model(layers, dataChess):
+    """Test the model on test set"""
+    nb_validated = 0
+    
+    for turn, party in dataChess:
+        board_layers = transformBoardToInput(party)
+        board_layers.insert(0, [1.0 if turn == "w" else 0.0])
+        inputTest = [val for layer in board_layers for val in layer]
+        nb_validated += tryBoardToInput(inputTest, layers, party, turn)
+    
+    test_accuracy = (nb_validated / len(dataChess)) * 100
+    return test_accuracy
+
+def main():
+    # Parse command line arguments
+    loadfile = "my_torch_network.nn"
+    savefile = None
+    chessfile = None
+    mode = "predict"  # default mode
+    
+    # Simple argument parsing
+    if len(sys.argv) > 1:
+        if sys.argv[1] in ["--predict", "-p"]:
+            mode = "predict"
+            if len(sys.argv) > 2:
+                loadfile = sys.argv[2]
+                if len(sys.argv) > 3:
+                    chessfile = sys.argv[3]
+        elif sys.argv[1] in ["--train", "-t"]:
+            mode = "train"
+            if len(sys.argv) > 3 and sys.argv[2] in ["--save", "-s"]:
+                savefile = sys.argv[3]
+                if len(sys.argv) > 4:
+                    loadfile = sys.argv[4]
+                    if len(sys.argv) > 5:
+                        chessfile = sys.argv[5]
+            elif len(sys.argv) > 2:
+                loadfile = sys.argv[2]
+                if len(sys.argv) > 3:
+                    chessfile = sys.argv[3]
+        elif sys.argv[1] in ["--help", "-h"]:
+            print("USAGE")
+            print("\t./my_torch_analyzer [--predict | --train [--save SAVEFILE]] LOADFILE CHESSFILE")
+            print("")
+            print("DESCRIPTION")
+            print("\t--train Launch the neural network in training mode. Each chessboard in FILE must contain inputs to send to the neural network in FEN notation and the expected output separated by space. If specified, the newly trained neural network will be saved in SAVEFILE. Otherwise, it will be saved in the original LOADFILE.")
+            print("\t--predict Launch the neural network in prediction mode. Each chessboard in FILE must contain inputs to send to the neural network in FEN notation, and optionally an expected output.")
+            print("\t--save Save neural network into SAVEFILE. Only works in train mode.")
+            print("")
+            print("\tLOADFILE File containing an artificial neural network")
+            print("\tCHESSFILE File containing chessboards")
+            return
+
+    if loadfile is None:
+        print("Error: LOADFILE must be specified.")
+        return
+    if chessfile is None:
+        print("Error: CHESSFILE must be specified.")
+        return
+
+    dataChess = fen_parser_to_data(chessfile)
+    # Create network (adjust learningRate if needed)
+    # 12 piece types × 64 squares + 1 turn indicator = 769 inputs
+    #layers = layersManager.layersManager(inputNb=769, hiddenNb=[128, 64], outputNb=3, learningRate=0.05)
+
+    inputs = []
+    targets = []
+    # Map string labels to one-hot vectors: [Nothing, Check, Checkmate]
+    label_to_onehot = {"Nothing": [1.0, 0.0, 0.0], "Check": [0.0, 1.0, 0.0], "Checkmate": [0.0, 0.0, 1.0]}
+    for turn, party, target in partiesTraining:
+        # Use transformBoardToInput and flatten to single vector
+        board_layers = transformBoardToInput(party)
+        board_layers.insert(0, [1.0 if turn == "w" else 0.0])  # Add turn indicator layer
+        flattened = [val for layer in board_layers for val in layer]
+        inputs.append(flattened)
+        targets.append(label_to_onehot[target])
+
+    if mode == "predict":
+        # Load existing model
+        try:
+            layers = ModelSaver.load_model(loadfile)
+            # Test the loaded model
+            accuracy = layers.evaluateValidation(inputs, targets)
+            test_model(layers, dataChess)
+            
+        except Exception as e:
+            return
+    elif mode == "train":
+        isValidation = False
+        maxEpochs = 100000
+        currentEpoch = 0
+
+
+        try:
+            layers = ModelSaver.load_model(loadfile)
+        except Exception as e:
+            return
+
+
+        while not isValidation:
+            currentEpoch += 1
+            # Shuffle order each epoch
+            indices = list(range(len(inputs)))
+            random.shuffle(indices)
+
+            for i in indices:
+                layers.setInputs(inputs[i])
+                layers.forwardCompute()
+                layers.backpropagate(targets, i)
+
+            # Evaluate once per epoch
+            accuracy = layers.evaluateValidation(inputs, targets)
+            if accuracy == 1.0:
+                isValidation = True
+                break
+            if currentEpoch >= maxEpochs:
+                break
+
+        accuracy = layers.evaluateValidation(inputs, targets)
+        for i, (turn, party, target) in enumerate(partiesTraining):
+            tryBoardToInput(inputs[i], layers, party, turn)
+        nb_validated = 0
+        for turn, party in dataChess:
+            board_layers = transformBoardToInput(party)
+            board_layers.insert(0, [1.0 if turn == "w" else 0.0])  # Add turn indicator layer for test
+            inputTest = [val for layer in board_layers for val in layer]
+            nb_validated += tryBoardToInput(inputTest, layers, party, turn)
+        if savefile:
+            loadfile = savefile
+        ModelSaver.save_model(layers, loadfile)
+
+if __name__ == '__main__':
+    main()

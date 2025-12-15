@@ -7,7 +7,7 @@
 
 from typing import List
 import numpy as np
-from .fen_parser import ParsedFEN
+from fen_parser import ParsedFEN
 
 
 class FENEncoder:
