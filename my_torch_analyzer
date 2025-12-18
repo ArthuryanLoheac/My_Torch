@@ -112,7 +112,7 @@ def main():
             return
     elif mode == "train":
         isValidation = False
-        maxEpochs = 100000
+        maxEpochs = 5000
         currentEpoch = 0
 
 
