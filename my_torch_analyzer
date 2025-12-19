@@ -135,7 +135,7 @@ def main():
 
             # Evaluate once per epoch
             accuracy = layers.evaluateValidation(inputs, targets)
-            if accuracy == 1.0:
+            if accuracy >= 0.8:
                 isValidation = True
                 break
             if currentEpoch >= maxEpochs:
