@@ -42,6 +42,7 @@ def main():
     savefile = None
     chessfile = None
     mode = "predict"  # default mode
+    train_bool = False
     
     # Simple argument parsing
     if len(sys.argv) > 1:
@@ -53,6 +54,7 @@ def main():
                     chessfile = sys.argv[3]
         elif sys.argv[1] in ["--train", "-t"]:
             mode = "train"
+            train_bool = True
             if len(sys.argv) > 3 and sys.argv[2] in ["--save", "-s"]:
                 savefile = sys.argv[3]
                 if len(sys.argv) > 4:
@@ -83,7 +85,7 @@ def main():
         print("Error: CHESSFILE must be specified.")
         return
 
-    dataChess = fen_parser_to_data(chessfile)
+    dataChess = fen_parser_to_data(chessfile, train_bool)
     # Create network (adjust learningRate if needed)
     # 12 piece types × 64 squares + 1 turn indicator = 769 inputs
     #layers = layersManager.layersManager(inputNb=769, hiddenNb=[128, 64], outputNb=3, learningRate=0.05)
@@ -92,7 +94,7 @@ def main():
     targets = []
     # Map string labels to one-hot vectors: [Nothing, Check, Checkmate]
     label_to_onehot = {"Nothing": [1.0, 0.0, 0.0], "Check": [0.0, 1.0, 0.0], "Checkmate": [0.0, 0.0, 1.0]}
-    for turn, party, target in partiesTraining:
+    for turn, party, target in dataChess:
         # Use transformBoardToInput and flatten to single vector
         board_layers = transformBoardToInput(party)
         board_layers.insert(0, [1.0 if turn == "w" else 0.0])  # Add turn indicator layer
@@ -142,10 +144,10 @@ def main():
                 break
 
         accuracy = layers.evaluateValidation(inputs, targets)
-        for i, (turn, party, target) in enumerate(partiesTraining):
+        for i, (turn, party, target) in enumerate(dataChess):
             tryBoardToInput(inputs[i], layers, party, turn)
         nb_validated = 0
-        for turn, party in dataChess:
+        for turn, party, targets in dataChess:
             board_layers = transformBoardToInput(party)
             board_layers.insert(0, [1.0 if turn == "w" else 0.0])  # Add turn indicator layer for test
             inputTest = [val for layer in board_layers for val in layer]
