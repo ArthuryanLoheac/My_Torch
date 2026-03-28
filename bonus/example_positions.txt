@@ -1,0 +1,62 @@
+# Example chess positions in FEN format
+# One position per line - copy/paste into the GUI input field
+
+# Starting position
+rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+
+# After 1.e4
+rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1
+
+# Sicilian Defense
+rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 2
+
+# Italian Game
+r1bqkbnr/pppp1ppp/2n5/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R b KQkq - 3 3
+
+# White in check
+rnb1kbnr/pppp1ppp/8/4p3/6Pq/5P2/PPPPP2P/RNBQKBNR w KQkq - 1 3
+
+# Black in check
+r1bqkb1r/pppp1ppp/2n2n2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR b KQkq - 4 4
+
+# Checkmate - White wins (Scholar's Mate)
+r1bqkb1r/pppp1Qpp/2n2n2/4p3/2B1P3/8/PPPP1PPP/RNB1K1NR b KQkq - 0 4
+
+# Checkmate - Black wins (Fool's Mate)
+rnbqkbnr/pppp1ppp/8/4p3/6Pq/5P2/PPPPP2P/RNBQKBNR w KQkq - 1 3
+
+# Checkmate - Back rank mate
+6k1/5ppp/8/8/8/8/5PPP/4R1K1 b - - 0 1
+
+# White in check from knight
+rnbqkb1r/pppppppp/5n2/8/3P4/8/PPP1PPPP/RNBQKBNR w KQkq - 1 2
+
+# Black in check from bishop
+r1bqkbnr/pppp1ppp/2n5/1B2p3/4P3/5N2/PPPP1PPP/RNBQK2R b KQkq - 3 3
+
+# Kiwipete (complex middlegame position)
+r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1
+
+# Endgame position (rook and pawn)
+8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 1
+
+# Tricky position (promotions possible)
+r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1Pp2/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1
+
+# Famous position - Kasparov vs Topalov 1999
+r1bq1rk1/1pp2pp1/p1np1n1p/2b1p3/2B1P3/2PP1N2/PP3PPP/RNBQ1RK1 w - - 0 10
+
+# Stalemate example
+7k/8/8/8/8/8/8/K6Q b - - 0 1
+
+# En passant capture available
+rnbqkbnr/ppp1p1pp/8/3pPp2/8/8/PPPP1PPP/RNBQKBNR w KQkq f6 0 3
+
+# Position with all castling rights
+r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1
+
+# Position with no castling rights
+r3k2r/8/8/8/8/8/8/R3K2R w - - 0 1
+
+# Queen vs pawns endgame
+8/8/8/3Q4/8/8/ppp5/k1K5 w - - 0 1
